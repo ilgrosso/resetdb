@@ -32,7 +32,7 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
 
 public class Main {
 
-    private static Logger LOG = LoggerFactory.getLogger(Main.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Main.class);
 
     private static ClassPathXmlApplicationContext ctx;
 
@@ -68,7 +68,7 @@ public class Main {
             try {
                 statement.executeUpdate(drop.substring(0, drop.length() - 1));
             } catch (SQLException e) {
-                LOG.error("Could not perform: {}", drop, e);
+                LOG.error("Could not perform: {}", drop);
             }
         }
         drops.clear();
@@ -124,7 +124,7 @@ public class Main {
     public static void main(final String[] args) {
         ctx = new ClassPathXmlApplicationContext("applicationContext.xml");
 
-        DBMS dbms = ctx.getBean(DBMS.class);
+        final DBMS dbms = ctx.getBean(DBMS.class);
         if (dbms == null) {
             throw new IllegalArgumentException("Could not find a valid DBMS bean");
         }
