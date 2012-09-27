@@ -1,1 +1,7 @@
 Remove any table, view and index from a given database. 
+
+Working:
+ * mvn -Poracle clean compile exec:exec
+ * mvn -Ppostgresql clean compile exec:exec
+
+Check src/main/resources/<DBMS>/jdbc.properties for connection properties
