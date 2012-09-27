@@ -40,7 +40,7 @@ under the License.
     <constructor-arg value="${jdbc.username}"/>
   </bean>
   
-  <bean id="latte" class="net.tirasa.ilgrosso.resetdb.DBMS" factory-method="valueOf">
+  <bean class="net.tirasa.ilgrosso.resetdb.DBMS" factory-method="valueOf">
     <constructor-arg value="${dbms}"/>
   </bean>
   
