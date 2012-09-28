@@ -145,11 +145,11 @@ public class Main {
         statement.close();
 
         statement = conn.createStatement();
-        statement.executeUpdate("EXEC sp_MSforeachtable \"DROP TABLE ?\"");
+        statement.executeUpdate("EXEC sp_MSforeachtable \"ALTER TABLE ? NOCHECK CONSTRAINT all\"");
         statement.close();
 
         statement = conn.createStatement();
-        statement.executeUpdate("EXEC sp_MSforeachtable \"ALTER TABLE ? NOCHECK CONSTRAINT all\"");
+        statement.executeUpdate("EXEC sp_MSforeachtable \"DROP TABLE ?\"");
         statement.close();
     }
 
