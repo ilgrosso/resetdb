@@ -121,6 +121,18 @@ public class Main {
         statement.close();
     }
 
+    private static void resetSQLServer(final Connection conn)
+            throws SQLException {
+
+        Statement statement = conn.createStatement();
+        statement.executeUpdate("EXEC sp_MSforeachtable \"DROP TABLE ?\"");
+        statement.close();
+
+        statement = conn.createStatement();
+        statement.executeUpdate("EXEC sp_MSforeachtable \"ALTER TABLE ? NOCHECK CONSTRAINT all\"");
+        statement.close();
+    }
+
     public static void main(final String[] args) {
         ctx = new ClassPathXmlApplicationContext("applicationContext.xml");
 
@@ -128,7 +140,7 @@ public class Main {
         if (dbms == null) {
             throw new IllegalArgumentException("Could not find a valid DBMS bean");
         }
-
+        
         final DataSource dataSource = ctx.getBean(DataSource.class);
         final Connection conn = DataSourceUtils.getConnection(dataSource);
         try {
@@ -139,6 +151,10 @@ public class Main {
 
                 case POSTGRESQL:
                     resetPostgreSQL(conn);
+                    break;
+
+                case SQLSERVER:
+                    resetSQLServer(conn);
                     break;
 
                 default:

@@ -42,9 +42,7 @@ under the License.
     <spring.version>3.1.2.RELEASE</spring.version>
     <slf4j.version>1.7.0</slf4j.version>
     <logback.version>1.0.7</logback.version>
-    
-    <dbms>ORACLE</dbms>
-    
+        
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
@@ -84,6 +82,8 @@ under the License.
   </dependencies>
 
   <build>
+    <defaultGoal>clean compile exec:exec</defaultGoal>
+    
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -159,6 +159,32 @@ under the License.
           </resource>
           <resource>
             <directory>src/main/resources/postgres</directory>
+            <filtering>true</filtering>
+          </resource>
+        </resources>
+      </build>
+    </profile>
+    
+    <profile>
+      <id>sqlserver</id>
+      <dependencies>
+        <dependency>
+          <groupId>com.microsoft.sqlserver</groupId>
+          <artifactId>sqljdbc4</artifactId>
+          <version>4.0</version>
+        </dependency>
+      </dependencies>
+      <build>
+        <resources>
+          <resource>
+            <directory>src/main/resources</directory>
+            <filtering>true</filtering>
+            <excludes>
+              <exclude>jdbc.properties</exclude>
+            </excludes>
+          </resource>
+          <resource>
+            <directory>src/main/resources/sqlserver</directory>
             <filtering>true</filtering>
           </resource>
         </resources>
