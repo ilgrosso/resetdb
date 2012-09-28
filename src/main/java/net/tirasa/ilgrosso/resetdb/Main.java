@@ -125,6 +125,26 @@ public class Main {
             throws SQLException {
 
         Statement statement = conn.createStatement();
+        final ResultSet resultSet = statement.executeQuery(
+                "SELECT sysobjects.name "
+                + "FROM sysobjects "
+                + "JOIN sysusers "
+                + "ON sysobjects.uid = sysusers.uid "
+                + "WHERE OBJECTPROPERTY(sysobjects.id, N'IsView') = 1");
+        final List<String> drops = new ArrayList<String>();
+        while (resultSet.next()) {
+            drops.add("DROP VIEW " + resultSet.getString(1));
+        }
+        resultSet.close();
+        statement.close();
+
+        statement = conn.createStatement();
+        for (String drop : drops) {
+            statement.executeUpdate(drop);
+        }
+        statement.close();
+
+        statement = conn.createStatement();
         statement.executeUpdate("EXEC sp_MSforeachtable \"DROP TABLE ?\"");
         statement.close();
 
@@ -140,7 +160,7 @@ public class Main {
         if (dbms == null) {
             throw new IllegalArgumentException("Could not find a valid DBMS bean");
         }
-        
+
         final DataSource dataSource = ctx.getBean(DataSource.class);
         final Connection conn = DataSourceUtils.getConnection(dataSource);
         try {
