@@ -20,8 +20,9 @@ package net.tirasa.ilgrosso.resetdb;
 
 public enum DBMS {
 
-    ORACLE,
     POSTGRESQL,
+    MYSQL,
+    ORACLE,
     SQLSERVER
 
 }
