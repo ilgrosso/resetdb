@@ -41,7 +41,7 @@ public class Main {
 
         try (final Statement statement = conn.createStatement()) {
 
-            final List<String> drops = new ArrayList<String>();
+            final List<String> drops = new ArrayList<>();
             try (final ResultSet resultSet = statement.executeQuery(
                     "SELECT 'DROP TABLE ' || c.relname || ' CASCADE;' FROM pg_catalog.pg_class c "
                     + "LEFT JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace "
@@ -65,7 +65,7 @@ public class Main {
 
         try (final Statement statement = conn.createStatement()) {
 
-            final List<String> drops = new ArrayList<String>();
+            final List<String> drops = new ArrayList<>();
             try ( ResultSet resultSet = statement.executeQuery(
                     "SELECT concat('DROP VIEW IF EXISTS ', table_name, ' CASCADE;')"
                     + "FROM information_schema.views;")) {
@@ -103,11 +103,10 @@ public class Main {
 
         try (final Statement statement = conn.createStatement()) {
 
-            final List<String> drops = new ArrayList<String>();
+            final List<String> drops = new ArrayList<>();
             try ( ResultSet resultSet = statement.executeQuery(
                     "SELECT 'DROP VIEW ' || object_name || ';'"
                     + " FROM user_objects WHERE object_type='VIEW'")) {
-
                 while (resultSet.next()) {
                     drops.add(resultSet.getString(1));
                 }
@@ -164,7 +163,7 @@ public class Main {
     private static void resetSQLServer(final Connection conn)
             throws SQLException {
 
-        final List<String> drops = new ArrayList<String>();
+        final List<String> drops = new ArrayList<>();
         try ( Statement statement = conn.createStatement()) {
             try ( ResultSet resultSet = statement.executeQuery(
                     "SELECT sysobjects.name "
