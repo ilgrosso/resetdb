@@ -46,7 +46,7 @@ public class Main {
                 + "LEFT JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace "
                 + "WHERE c.relkind IN ('r','') AND n.nspname NOT IN ('pg_catalog', 'pg_toast') "
                 + "AND pg_catalog.pg_table_is_visible(c.oid)");
-        final List<String> drops = new ArrayList<String>();
+        final List<String> drops = new ArrayList<>();
         while (resultSet.next()) {
             drops.add(resultSet.getString(1));
         }
@@ -68,7 +68,7 @@ public class Main {
         ResultSet resultSet = statement.executeQuery(
                 "SELECT concat('DROP VIEW IF EXISTS ', table_name, ' CASCADE;')"
                 + "FROM information_schema.views;");
-        final List<String> drops = new ArrayList<String>();
+        final List<String> drops = new ArrayList<>();
         while (resultSet.next()) {
             drops.add(resultSet.getString(1));
         }
@@ -105,7 +105,7 @@ public class Main {
         ResultSet resultSet = statement.executeQuery(
                 "SELECT 'DROP VIEW ' || object_name || ';'"
                 + " FROM user_objects WHERE object_type='VIEW'");
-        final List<String> drops = new ArrayList<String>();
+        final List<String> drops = new ArrayList<>();
         while (resultSet.next()) {
             drops.add(resultSet.getString(1));
         }
@@ -169,7 +169,7 @@ public class Main {
                 + "JOIN sysusers "
                 + "ON sysobjects.uid = sysusers.uid "
                 + "WHERE OBJECTPROPERTY(sysobjects.id, N'IsView') = 1");
-        final List<String> drops = new ArrayList<String>();
+        final List<String> drops = new ArrayList<>();
         while (resultSet.next()) {
             drops.add("DROP VIEW " + resultSet.getString(1));
         }
