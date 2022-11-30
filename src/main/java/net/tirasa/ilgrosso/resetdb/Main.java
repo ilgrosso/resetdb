@@ -39,158 +39,159 @@ public class Main {
     private static void resetPostgreSQL(final Connection conn)
             throws Exception {
 
-        final Statement statement = conn.createStatement();
+        try (final Statement statement = conn.createStatement()) {
 
-        final ResultSet resultSet = statement.executeQuery(
-                "SELECT 'DROP TABLE ' || c.relname || ' CASCADE;' FROM pg_catalog.pg_class c "
-                + "LEFT JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace "
-                + "WHERE c.relkind IN ('r','') AND n.nspname NOT IN ('pg_catalog', 'pg_toast') "
-                + "AND pg_catalog.pg_table_is_visible(c.oid)");
-        final List<String> drops = new ArrayList<>();
-        while (resultSet.next()) {
-            drops.add(resultSet.getString(1));
+            final List<String> drops = new ArrayList<>();
+            try (final ResultSet resultSet = statement.executeQuery(
+                    "SELECT 'DROP TABLE ' || c.relname || ' CASCADE;' FROM pg_catalog.pg_class c "
+                    + "LEFT JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace "
+                    + "WHERE c.relkind IN ('r','') AND n.nspname NOT IN ('pg_catalog', 'pg_toast') "
+                    + "AND pg_catalog.pg_table_is_visible(c.oid)")) {
+                while (resultSet.next()) {
+                    drops.add(resultSet.getString(1));
+                }
+            }
+
+            for (String drop : drops) {
+                statement.executeUpdate(drop.substring(0, drop.length() - 1));
+            }
+
         }
-        resultSet.close();
 
-        for (String drop : drops) {
-            statement.executeUpdate(drop.substring(0, drop.length() - 1));
-        }
-
-        statement.close();
-        conn.close();
     }
 
     private static void resetMySQL(final Connection conn)
             throws Exception {
 
-        final Statement statement = conn.createStatement();
+        try (final Statement statement = conn.createStatement()) {
 
-        ResultSet resultSet = statement.executeQuery(
-                "SELECT concat('DROP VIEW IF EXISTS ', table_name, ' CASCADE;')"
-                + "FROM information_schema.views;");
-        final List<String> drops = new ArrayList<>();
-        while (resultSet.next()) {
-            drops.add(resultSet.getString(1));
+            final List<String> drops = new ArrayList<>();
+            try (ResultSet resultSet = statement.executeQuery(
+                    "SELECT concat('DROP VIEW IF EXISTS ', table_name, ' CASCADE;')"
+                    + "FROM information_schema.views;")) {
+                while (resultSet.next()) {
+                    drops.add(resultSet.getString(1));
+                }
+            }
+
+            for (String drop : drops) {
+                statement.executeUpdate(drop.substring(0, drop.length() - 1));
+            }
+            drops.clear();
+
+            drops.add("SET FOREIGN_KEY_CHECKS = 0;");
+
+            try (ResultSet resultSet = statement.executeQuery(
+                    "SELECT concat('DROP TABLE IF EXISTS ', table_name, ' CASCADE;')"
+                    + "FROM information_schema.tables;")) {
+                while (resultSet.next()) {
+                    drops.add(resultSet.getString(1));
+                }
+            }
+            drops.add("SET FOREIGN_KEY_CHECKS = 1;");
+
+            for (String drop : drops) {
+                statement.executeUpdate(drop.substring(0, drop.length() - 1));
+            }
+
         }
-        resultSet.close();
 
-        for (String drop : drops) {
-            statement.executeUpdate(drop.substring(0, drop.length() - 1));
-        }
-        drops.clear();
-
-        drops.add("SET FOREIGN_KEY_CHECKS = 0;");
-        resultSet = statement.executeQuery(
-                "SELECT concat('DROP TABLE IF EXISTS ', table_name, ' CASCADE;')"
-                + "FROM information_schema.tables;");
-        while (resultSet.next()) {
-            drops.add(resultSet.getString(1));
-        }
-        resultSet.close();
-        drops.add("SET FOREIGN_KEY_CHECKS = 1;");
-
-        for (String drop : drops) {
-            statement.executeUpdate(drop.substring(0, drop.length() - 1));
-        }
-
-        statement.close();
-        conn.close();
     }
 
     private static void resetOracle(final Connection conn)
             throws Exception {
 
-        final Statement statement = conn.createStatement();
+        try (final Statement statement = conn.createStatement()) {
 
-        ResultSet resultSet = statement.executeQuery(
-                "SELECT 'DROP VIEW ' || object_name || ';'"
-                + " FROM user_objects WHERE object_type='VIEW'");
-        final List<String> drops = new ArrayList<>();
-        while (resultSet.next()) {
-            drops.add(resultSet.getString(1));
-        }
-        resultSet.close();
-
-        for (String drop : drops) {
-            statement.executeUpdate(drop.substring(0, drop.length() - 1));
-        }
-        drops.clear();
-
-        resultSet = statement.executeQuery(
-                "SELECT 'DROP INDEX ' || object_name || ';'"
-                + " FROM user_objects WHERE object_type='INDEX'"
-                + " AND object_name NOT LIKE 'SYS_%'");
-        while (resultSet.next()) {
-            drops.add(resultSet.getString(1));
-        }
-        resultSet.close();
-
-        for (String drop : drops) {
-            try {
-                statement.executeUpdate(drop.substring(0, drop.length() - 1));
-            } catch (SQLException e) {
-                LOG.error("Could not perform: {}", drop);
+            final List<String> drops = new ArrayList<>();
+            try (ResultSet resultSet = statement.executeQuery(
+                    "SELECT 'DROP VIEW ' || object_name || ';'"
+                    + " FROM user_objects WHERE object_type='VIEW'")) {
+                while (resultSet.next()) {
+                    drops.add(resultSet.getString(1));
+                }
             }
-        }
-        drops.clear();
 
-        resultSet = statement.executeQuery(
-                "SELECT 'DROP TABLE ' || table_name || ' CASCADE CONSTRAINTS;'"
-                + " FROM all_TABLES WHERE owner='"
-                + ((String) ctx.getBean("username")).toUpperCase() + "'");
-        while (resultSet.next()) {
-            drops.add(resultSet.getString(1));
-        }
-        resultSet.close();
+            for (String drop : drops) {
+                statement.executeUpdate(drop.substring(0, drop.length() - 1));
+            }
+            drops.clear();
 
-        resultSet = statement.executeQuery(
-                "SELECT 'DROP SEQUENCE ' || sequence_name || ';'"
-                + " FROM user_SEQUENCES");
-        while (resultSet.next()) {
-            drops.add(resultSet.getString(1));
-        }
-        resultSet.close();
+            try (ResultSet resultSet = statement.executeQuery(
+                    "SELECT 'DROP INDEX ' || object_name || ';'"
+                    + " FROM user_objects WHERE object_type='INDEX'"
+                    + " AND object_name NOT LIKE 'SYS_%'")) {
+                while (resultSet.next()) {
+                    drops.add(resultSet.getString(1));
+                }
+            }
 
-        for (String drop : drops) {
-            statement.executeUpdate(drop.substring(0, drop.length() - 1));
+            for (String drop : drops) {
+                try {
+                    statement.executeUpdate(drop.substring(0, drop.length() - 1));
+                } catch (SQLException e) {
+                    LOG.error("Could not perform: {}", drop);
+                }
+            }
+            drops.clear();
+
+            try (ResultSet resultSet = statement.executeQuery(
+                    "SELECT 'DROP TABLE ' || table_name || ' CASCADE CONSTRAINTS;'"
+                    + " FROM all_TABLES WHERE owner='"
+                    + ((String) ctx.getBean("username")).toUpperCase() + "'")) {
+                while (resultSet.next()) {
+                    drops.add(resultSet.getString(1));
+                }
+            }
+
+            try (ResultSet resultSet = statement.executeQuery(
+                    "SELECT 'DROP SEQUENCE ' || sequence_name || ';'"
+                    + " FROM user_SEQUENCES")) {
+                while (resultSet.next()) {
+                    drops.add(resultSet.getString(1));
+                }
+            }
+
+            for (String drop : drops) {
+                statement.executeUpdate(drop.substring(0, drop.length() - 1));
+            }
+
         }
 
-        statement.close();
-        conn.close();
     }
 
     private static void resetSQLServer(final Connection conn)
             throws SQLException {
 
-        Statement statement = conn.createStatement();
-        final ResultSet resultSet = statement.executeQuery(
-                "SELECT sysobjects.name "
-                + "FROM sysobjects "
-                + "JOIN sysusers "
-                + "ON sysobjects.uid = sysusers.uid "
-                + "WHERE OBJECTPROPERTY(sysobjects.id, N'IsView') = 1");
         final List<String> drops = new ArrayList<>();
-        while (resultSet.next()) {
-            drops.add("DROP VIEW " + resultSet.getString(1));
+        try (Statement statement = conn.createStatement()) {
+            try (ResultSet resultSet = statement.executeQuery(
+                    "SELECT sysobjects.name "
+                    + "FROM sysobjects "
+                    + "JOIN sysusers "
+                    + "ON sysobjects.uid = sysusers.uid "
+                    + "WHERE OBJECTPROPERTY(sysobjects.id, N'IsView') = 1")) {
+
+                while (resultSet.next()) {
+                    drops.add("DROP VIEW " + resultSet.getString(1));
+                }
+            }
         }
-        resultSet.close();
-        statement.close();
 
-        statement = conn.createStatement();
-        for (String drop : drops) {
-            statement.executeUpdate(drop);
+        try (Statement statement = conn.createStatement()) {
+            for (String drop : drops) {
+                statement.executeUpdate(drop);
+            }
         }
-        statement.close();
 
-        statement = conn.createStatement();
-        statement.executeUpdate("EXEC sp_MSforeachtable \"ALTER TABLE ? NOCHECK CONSTRAINT all\"");
-        statement.close();
+        try (Statement statement = conn.createStatement()) {
+            statement.executeUpdate("EXEC sp_MSforeachtable \"ALTER TABLE ? NOCHECK CONSTRAINT all\"");
+        }
 
-        statement = conn.createStatement();
-        statement.executeUpdate("EXEC sp_MSforeachtable \"DROP TABLE ?\"");
-        statement.close();
+        try (Statement statement = conn.createStatement()) {
+            statement.executeUpdate("EXEC sp_MSforeachtable \"DROP TABLE ?\"");
+        }
 
-        conn.close();
     }
 
     public static void main(final String[] args) {
@@ -217,7 +218,6 @@ public class Main {
                 case ORACLE:
                     resetOracle(conn);
                     break;
-
 
                 case SQLSERVER:
                     resetSQLServer(conn);
