@@ -66,7 +66,7 @@ public class Main {
         try (final Statement statement = conn.createStatement()) {
 
             final List<String> drops = new ArrayList<>();
-            try ( ResultSet resultSet = statement.executeQuery(
+            try (ResultSet resultSet = statement.executeQuery(
                     "SELECT concat('DROP VIEW IF EXISTS ', table_name, ' CASCADE;')"
                     + "FROM information_schema.views;")) {
                 while (resultSet.next()) {
@@ -81,7 +81,7 @@ public class Main {
 
             drops.add("SET FOREIGN_KEY_CHECKS = 0;");
 
-            try ( ResultSet resultSet = statement.executeQuery(
+            try (ResultSet resultSet = statement.executeQuery(
                     "SELECT concat('DROP TABLE IF EXISTS ', table_name, ' CASCADE;')"
                     + "FROM information_schema.tables;")) {
                 while (resultSet.next()) {
@@ -104,7 +104,7 @@ public class Main {
         try (final Statement statement = conn.createStatement()) {
 
             final List<String> drops = new ArrayList<>();
-            try ( ResultSet resultSet = statement.executeQuery(
+            try (ResultSet resultSet = statement.executeQuery(
                     "SELECT 'DROP VIEW ' || object_name || ';'"
                     + " FROM user_objects WHERE object_type='VIEW'")) {
                 while (resultSet.next()) {
@@ -117,7 +117,7 @@ public class Main {
             }
             drops.clear();
 
-            try ( ResultSet resultSet = statement.executeQuery(
+            try (ResultSet resultSet = statement.executeQuery(
                     "SELECT 'DROP INDEX ' || object_name || ';'"
                     + " FROM user_objects WHERE object_type='INDEX'"
                     + " AND object_name NOT LIKE 'SYS_%'")) {
@@ -135,7 +135,7 @@ public class Main {
             }
             drops.clear();
 
-            try ( ResultSet resultSet = statement.executeQuery(
+            try (ResultSet resultSet = statement.executeQuery(
                     "SELECT 'DROP TABLE ' || table_name || ' CASCADE CONSTRAINTS;'"
                     + " FROM all_TABLES WHERE owner='"
                     + ((String) ctx.getBean("username")).toUpperCase() + "'")) {
@@ -144,7 +144,7 @@ public class Main {
                 }
             }
 
-            try ( ResultSet resultSet = statement.executeQuery(
+            try (ResultSet resultSet = statement.executeQuery(
                     "SELECT 'DROP SEQUENCE ' || sequence_name || ';'"
                     + " FROM user_SEQUENCES")) {
                 while (resultSet.next()) {
@@ -164,8 +164,8 @@ public class Main {
             throws SQLException {
 
         final List<String> drops = new ArrayList<>();
-        try ( Statement statement = conn.createStatement()) {
-            try ( ResultSet resultSet = statement.executeQuery(
+        try (Statement statement = conn.createStatement()) {
+            try (ResultSet resultSet = statement.executeQuery(
                     "SELECT sysobjects.name "
                     + "FROM sysobjects "
                     + "JOIN sysusers "
@@ -178,17 +178,17 @@ public class Main {
             }
         }
 
-        try ( Statement statement = conn.createStatement()) {
+        try (Statement statement = conn.createStatement()) {
             for (String drop : drops) {
                 statement.executeUpdate(drop);
             }
         }
 
-        try ( Statement statement = conn.createStatement()) {
+        try (Statement statement = conn.createStatement()) {
             statement.executeUpdate("EXEC sp_MSforeachtable \"ALTER TABLE ? NOCHECK CONSTRAINT all\"");
         }
 
-        try ( Statement statement = conn.createStatement()) {
+        try (Statement statement = conn.createStatement()) {
             statement.executeUpdate("EXEC sp_MSforeachtable \"DROP TABLE ?\"");
         }
 
