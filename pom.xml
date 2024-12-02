@@ -39,7 +39,7 @@ under the License.
   </licenses>
 
   <properties>
-    <spring.version>3.1.2.RELEASE</spring.version>
+    <spring.version>6.1.14</spring.version>
     <slf4j.version>1.7.0</slf4j.version>
     <logback.version>1.3.12</logback.version>
         
